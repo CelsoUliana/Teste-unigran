@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PeopleService from "../services/people.service";
 import { Link } from "react-router-dom";
-import { cpfRegex, telefoneRegex } from '../utils/format'
+import { cpfRegex, telefoneRegex, nascimentoRegex } from '../utils/format'
 
 /*
   Componente de listagem de pessoas.
@@ -14,11 +14,12 @@ export default class PeopleList extends Component {
   constructor(props) {
     super(props);
 
+    this.clearSearch = this.clearSearch.bind(this);
     this.refreshList = this.refreshList.bind(this);
+    this.dynamicSearch = this.dynamicSearch.bind(this);
     this.onChangeSearch = this.onChangeSearch.bind(this);
     this.retrievePeople = this.retrievePeople.bind(this);
     this.setActivePeople = this.setActivePeople.bind(this);
-    this.dynamicSearch = this.dynamicSearch.bind(this);
 
     this.state = {
       people: [],
@@ -36,19 +37,20 @@ export default class PeopleList extends Component {
     this.retrievePeople();
   }
 
-  dynamicSearch(){
-    return this.state.people.filter(people => people.nome.toLowerCase().includes(this.state.searchTitle.toLowerCase()));
+  /*
+    Limpa o valor da busca quando é disparado.
+  */
+  clearSearch(){
+    this.setState({
+      searchTitle: ""
+    });
   }
 
   /*
-    Função que busca uma pessoa pelo nome.
+    Retorna a lista filtrada dinamicamente (conforme o usuario vai digitando).
   */
-  searchPeople(){
-    this.setState({
-      currentPeople: null,
-      currentIndex: -1
-    });
-    // demais logica
+  dynamicSearch(){
+    return this.state.people.filter(people => people.nome.toLowerCase().includes(this.state.searchTitle.toLowerCase()));
   }
 
   /*
@@ -70,6 +72,7 @@ export default class PeopleList extends Component {
   setActivePeople(people, index) {
     people.cpf = cpfRegex(people.cpf);
     people.telefone = telefoneRegex(people.telefone);
+    people.data_nascimento = nascimentoRegex(people.data_nascimento);
 
     this.setState({
       currentPeople: people,
@@ -105,7 +108,7 @@ export default class PeopleList extends Component {
   }
 
   render() {
-    const { people, currentPeople, currentIndex, searchTitle } = this.state;
+    const { currentPeople, currentIndex, searchTitle } = this.state;
 
     return (
       <div className="list row">
@@ -118,6 +121,13 @@ export default class PeopleList extends Component {
               value={searchTitle}
               onChange={this.onChangeSearch}
             />
+             <button
+                className="btn btn-outline-secondary"
+                type="button"
+                onClick={this.clearSearch}
+              >
+                  Limpar busca
+              </button>
           </div>
         </div>
         <div className="col-md-6">
@@ -138,13 +148,24 @@ export default class PeopleList extends Component {
                 </li>
               ))}
           </ul>
-
-          <button
-            className="m-3 btn btn-sm btn-primary"
-            onClick={console.log('dale')}
-          >
-            Adicionar 
-          </button>
+          <br></br>
+          <div className="btn-group btn-group">
+            <Link to={"/add"}>
+              <button
+                className="m-6 btn btn-sm btn-primary"
+              >
+                Cadastrar 
+              </button>
+            </Link>
+            <Link>
+              <button
+                className="m-6 btn btn-sm btn-secondary"
+                onClick={this.refreshList}
+              >
+                Atualizar lista 
+              </button>
+            </Link>
+          </div>
         </div>
         <div className="col-md-6">
           {currentPeople ? (
@@ -193,7 +214,7 @@ export default class PeopleList extends Component {
                 </label>{" "}
                 {currentPeople.seu_diferencial}
               </div>
-              <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
+              <div class="btn-group btn-group-lg" role="group">
               <Link
                 to={"/people/" + currentPeople.id}
               >

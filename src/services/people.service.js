@@ -7,6 +7,9 @@ class PeopleService{
     async getAll() {
         return axios.get('/tecnico');
     }
+    async create(data) {
+        return axios.post("/tecnico", data);
+    }
 }
 
 export default new PeopleService();

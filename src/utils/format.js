@@ -24,5 +24,10 @@ export const telefoneRegex = value => {
     return value
         .replace(/\D/g, '') 
         .replace(/(\d{1})(\d{1})/, '($1$2)') 
-        .replace(/(\d{4,5})-?(\d{4})/, '$1-$2')
+        .replace(/(\d{4,5})(\d{4})/, '$1-$2')
+}
+
+export const nascimentoRegex = value => {
+    return value
+        .replace(/(\d{4})-(\d{2})-(\d{2})/, '$3.$2.$1') 
 }
