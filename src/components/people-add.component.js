@@ -4,6 +4,7 @@ import {
   InputCpf, InputDataNascimento, InputGenero, InputTelefone,
 } from '../utils/inputs';
 import { validator } from '../utils/validator';
+import { cpfRegex, telefoneRegex, nascimentoRegex } from '../utils/format';
 
 /*
   Componente de cadastro de novas pessoas.
@@ -93,13 +94,13 @@ export default class AddPeople extends Component {
   */
   async savePeople() {
     const data = {
-      cpf: this.state.cpf,
+      cpf: cpfRegex(this.state.cpf),
       nome: this.state.nome,
       email: this.state.email,
       genero: this.state.genero.toUpperCase(),
-      telefone: this.state.telefone,
+      telefone: telefoneRegex(this.state.telefone),
       seu_diferencial: this.state.seu_diferencial,
-      data_nascimento: this.state.data_nascimento,
+      data_nascimento: nascimentoRegex(this.state.data_nascimento),
     };
 
     const objetoValidacao = validator(data);
