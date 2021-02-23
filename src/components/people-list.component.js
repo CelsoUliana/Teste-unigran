@@ -20,6 +20,7 @@ export default class PeopleList extends Component {
     this.onChangeSearch = this.onChangeSearch.bind(this);
     this.retrievePeople = this.retrievePeople.bind(this);
     this.setActivePeople = this.setActivePeople.bind(this);
+    this.deleteCurrentPeople = this.deleteCurrentPeople.bind(this);
 
     this.state = {
       people: [],
@@ -33,7 +34,7 @@ export default class PeopleList extends Component {
     Função que é executada logo após a montagem do component.
     Nesse caso, faz a busca de todas as pessoas.
   */
-  async componentDidMount() {
+  async componentDidMount(){
     this.retrievePeople();
   }
 
@@ -57,7 +58,7 @@ export default class PeopleList extends Component {
     Quando o valor do parametro de busca muda, essa função é executa.
     Ela muda o estado com o novo valor de busca.
   */
-  onChangeSearch(event) {
+  onChangeSearch(event){
     const searchTitle = event.target.value;
 
     this.setState({
@@ -69,7 +70,7 @@ export default class PeopleList extends Component {
     Acontece quando um registro é clickado.
     Muda o estado para a pessoa atual a ser visualizada e renderizada no template HTML.
   */
-  setActivePeople(people, index) {
+  setActivePeople(people, index){
     people.cpf = cpfRegex(people.cpf);
     people.telefone = telefoneRegex(people.telefone);
     people.data_nascimento = nascimentoRegex(people.data_nascimento);
@@ -83,11 +84,12 @@ export default class PeopleList extends Component {
   /*
     Função auxiliar para dar refresh na lista.
   */
-  refreshList() {
+  refreshList(){
     this.retrievePeople();
     this.setState({
       currentPeople: null,
-      currentIndex: -1
+      currentIndex: -1,
+      searchTitle: ""
     });
   }
 
@@ -97,13 +99,30 @@ export default class PeopleList extends Component {
   */
   async retrievePeople() {
     try{
-      const response = await PeopleService.getAll()
+      const response = await PeopleService.getAll();
       this.setState({
         people: response.data
       })
     } 
-    catch (error) {
-      console.log(error)
+    catch(error){
+      console.log(error);
+    }
+  }
+
+  /*
+    Função que deleta a pessoa selecionada.
+  */
+  async deleteCurrentPeople(){
+    const id = this.state.currentPeople.id;
+    try{
+      let response = await PeopleService.delete(id);
+      console.log(response.data);
+      alert(response.data + " em deletar a pessoa");
+      this.refreshList();
+    }
+    catch(error){
+      alert('erro ao excluir');
+      console.log(error);
     }
   }
 
@@ -157,14 +176,12 @@ export default class PeopleList extends Component {
                 Cadastrar 
               </button>
             </Link>
-            <Link>
               <button
                 className="m-6 btn btn-sm btn-secondary"
                 onClick={this.refreshList}
               >
                 Atualizar lista 
               </button>
-            </Link>
           </div>
         </div>
         <div className="col-md-6">
@@ -206,7 +223,7 @@ export default class PeopleList extends Component {
                 <label>
                   <strong>Genero:</strong>
                 </label>{" "}
-                {currentPeople.genero === "M" ? "Mulher" : "Homem"}
+                {currentPeople.genero === "M" ? "Homem" : "Mulher"}
               </div>
               <div>
                 <label>
@@ -214,7 +231,7 @@ export default class PeopleList extends Component {
                 </label>{" "}
                 {currentPeople.seu_diferencial}
               </div>
-              <div class="btn-group btn-group-lg" role="group">
+              <div className="btn-group" role="group">
               <Link
                 to={"/people/" + currentPeople.id}
               >
@@ -222,13 +239,9 @@ export default class PeopleList extends Component {
                   Editar
                 </button>
               </Link>
-              <Link
-                to={"/people/" + currentPeople.id}
-              >
-                <button className="m-6 btn btn-danger">
+                <button onClick={this.deleteCurrentPeople} className="m-6 btn btn-danger">
                   Excluir
                 </button>
-              </Link>
               </div>
             </div>
           ) : (

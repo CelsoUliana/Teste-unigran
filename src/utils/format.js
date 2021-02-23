@@ -12,7 +12,7 @@ export const cpfRegex = value => {
       .replace(/(\d{3})(\d)/, '$1.$2') 
       .replace(/(\d{3})(\d)/, '$1.$2')
       .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1') 
+      .replace(/(-\d{2})\d+?$/, '$1'); 
 }
 
 export const telefoneRegex = value => {
@@ -24,10 +24,13 @@ export const telefoneRegex = value => {
     return value
         .replace(/\D/g, '') 
         .replace(/(\d{1})(\d{1})/, '($1$2)') 
-        .replace(/(\d{4,5})(\d{4})/, '$1-$2')
+        .replace(/(\d{4,5})(\d{4})/, '$1-$2');
 }
 
 export const nascimentoRegex = value => {
+    /*
+        Muda a ordem dos termos tirando os traços e botando pontos.
+    */
     return value
-        .replace(/(\d{4})-(\d{2})-(\d{2})/, '$3.$2.$1') 
+        .replace(/(\d{4})-(\d{2})-(\d{2})/, '$3.$2.$1');
 }

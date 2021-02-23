@@ -1,7 +1,7 @@
 import axios from './axios';
 
 /*
-    Classe que faz as requisições para a API e retorna dados.
+    Classe que faz as requisições HTTP para a API e retorna dados.
 */
 class PeopleService{
     async getAll() {
@@ -9,6 +9,9 @@ class PeopleService{
     }
     async create(data) {
         return axios.post("/tecnico", data);
+    }
+    async delete(id){
+        return axios.delete('/tecnico/' + id);
     }
 }
 

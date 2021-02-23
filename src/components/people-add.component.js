@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PeopleService from '../services/people.service';
+import { InputCpf, InputDataNascimento, InputGenero, InputTelefone } from "../utils/inputs";
 import { validator } from '../utils/validator';
 
 export default class AddPeople extends Component {
@@ -25,79 +26,80 @@ export default class AddPeople extends Component {
       data_nascimento: "",
       seu_diferencial: "",
 
-      published: false,
-      submitted: false
+      saved: false
     };
   }
 
   /*
     Binds de todos os valores que precisam ser salvos.
   */
-  onChangeNome(e) {
+  onChangeNome(e){
     this.setState({
       nome: e.target.value
     });
   }
 
-  onChangeCpf(e) {
+  onChangeCpf(e){
     this.setState({
       cpf: e.target.value
     });
   }
 
-  onChangeTelefone(e) {
+  onChangeTelefone(e){
     this.setState({
       telefone: e.target.value
     });
   }
 
-  onChangeEmail(e) {
+  onChangeEmail(e){
     this.setState({
       email: e.target.value
     });
   }
 
-  onChangeDataNascimento(e) {
+  onChangeDataNascimento(e){
     this.setState({
       data_nascimento: e.target.value
     });
   }
 
-  onChangeGenero(e) {
+  onChangeGenero(e){
     this.setState({
       genero: e.target.value
     });
   }
 
-  onChangeSeuDiferencial(e) {
+  onChangeSeuDiferencial(e){
     this.setState({
       seu_diferencial: e.target.value
     });
   }
 
-  async savePeople() {
+  async savePeople(){
     let data = {
       cpf: this.state.cpf,
       nome: this.state.nome,
       email: this.state.email,
-      genero: this.state.genero,
+      genero: this.state.genero.toUpperCase(),
       telefone: this.state.telefone,
       seu_diferencial: this.state.seu_diferencial,
       data_nascimento: this.state.data_nascimento,
     };
 
-    console.log(data)
+    console.log(data);
 
-    if(!validator(data)){
-        alert("Formulario contem erros.");
+    let objetoValidacao = validator(data);
+
+    if(!objetoValidacao.formValido){
+        alert("Formulário contém erros. Seguintes campos não estão validados: " + objetoValidacao.msgErro);
     }
 
     else{
         try{
-            //const response = await PeopleService.create(data);
-            //console.log(response);
-            alert("Registro salvo");
-            this.newPeople();
+            await PeopleService.create(data);
+            this.setState({
+                saved: true
+            })
         }
         catch(error){
             console.log(error);
@@ -118,19 +120,18 @@ export default class AddPeople extends Component {
         data_nascimento: "",
         seu_diferencial: "",
   
-        published: false,
-        submitted: false
+        saved: false
       });
   }
 
   render() {
     return (
       <div className="submit-form">
-        {this.state.submitted ? (
+        {this.state.saved ? (
           <div>
-            <h4>You submitted successfully!</h4>
+            <h4>Você cadastrou com sucesso!</h4>
             <button className="btn btn-success" onClick={this.newPeople}>
-              Add
+              Cadastrar outra pessoa
             </button>
           </div>
         ) : (
@@ -147,29 +148,28 @@ export default class AddPeople extends Component {
                 name="nome"
               />
             </div>
+            <label htmlFor="cpf">CPF</label>
             <div className="form-group">
-              <label htmlFor="cpf">CPF</label>
-              <input
-                type="text"
-                className="form-control"
-                id="cpf"
-                required
-                value={this.state.cpf}
-                onChange={this.onChangeCpf}
-                name="cpf"
-              />
+              <InputCpf 
+              type="text"
+              id="cpf"
+              required
+              value={this.state.cpf}
+              onChange={this.onChangeCpf}
+              name="cpf"
+              >
+              </InputCpf>
             </div>
             <div className="form-group">
               <label htmlFor="telefone">Telefone</label>
-              <input
-                type="text"
-                className="form-control"
-                id="telefone"
-                required
-                value={this.state.telefone}
-                onChange={this.onChangeTelefone}
-                name="telefone"
-              />
+              <InputTelefone
+              type="text"
+              id="telefone"
+              required
+              value={this.state.telefone}
+              onChange={this.onChangeTelefone}
+              name="telefone"
+              ></InputTelefone>
             </div>
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -185,27 +185,26 @@ export default class AddPeople extends Component {
             </div>
             <div className="form-group">
               <label htmlFor="data_nascimento">Data de nascimento</label>
-              <input
-                type="text"
-                className="form-control"
-                id="data_nascimento"
-                required
-                value={this.state.data_nascimento}
-                onChange={this.onChangeDataNascimento}
-                name="data_nascimento"
-              />
+              <InputDataNascimento
+              type="text"
+              id="data_nascimento"
+              required
+              value={this.state.data_nascimento}
+              onChange={this.onChangeDataNascimento}
+              name="data_nascimento"
+              ></InputDataNascimento>
             </div>
             <div className="form-group">
-              <label htmlFor="genero">Gênero</label>
-              <input
-                type="text"
-                className="form-control"
-                id="genero"
-                required
-                value={this.state.genero}
-                onChange={this.onChangeGenero}
-                name="genero"
-              />
+              <label htmlFor="genero">Letra inicial do seu gênero - M:Masculino - F:Feminino</label>
+              <InputGenero
+              type="text"
+              id="genero"
+              required
+              value={this.state.genero}
+              onChange={this.onChangeGenero}
+              name="genero"
+              >
+              </InputGenero>
             </div>
             <div className="form-group">
               <label htmlFor="seu_diferencial">Seu diferencial</label>
@@ -220,7 +219,7 @@ export default class AddPeople extends Component {
               />
             </div>
 
-            <button onClick={this.savePeople} className="btn btn-success">
+            <button onClick={this.savePeople} className="btn btn-lg btn-success">
               Cadastrar
             </button>
           </div>

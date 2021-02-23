@@ -6,11 +6,10 @@ export default axios.create({
     Headers setados de acordo com os headers do Postman para fazer a testagem da API.
   */
   headers: {
-    "Content-type": "application/json, application/x-www-form-urlencoded, text/plain, multipart/form-data",
-    "Access-Control-Allow-Origin": process.env.REACT_APP_API_URL,
-    "Access-Control-Allow-Headers": "Accept",
-    "Accept-Encoding": "gzip, deflate, br",
+    "Content-type": "application/json, application/x-www-form-urlencoded, text/plain, text/html, multipart/form-data",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE",
+    "Access-Control-Allow-Headers": "*",
     "Accept": "*/*",
-    "Host": "Localhost:8081"
   }
 });
