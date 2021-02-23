@@ -1,23 +1,24 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import PeopleService from '../services/people.service';
-import {
-  InputCpf, InputDataNascimento, InputGenero, InputTelefone,
-} from '../utils/inputs';
+import { cpfRegex, telefoneRegex, nascimentoRegex } from '../utils/format';
+import { InputCpf, InputDataNascimento, InputGenero } from '../utils/inputs';
 import { validator } from '../utils/validator';
 
 /*
-  Componente de cadastro de novas pessoas.
+    Componente de edição, é basicamente o componente de adicionar com algumas funções a mais
+    E mudanças de nomenclatura. Poderia ter feito um componente generico que Cadastraria ou atualizaria.
+    Mas por motivos de organização e simplicidade escolhi desse jeito.
 */
-export default class AddPeople extends Component {
+export default class EditPeople extends Component {
   /*
-    Construtor, onde se realiza os bindings de funções ( que possibilita serem chamados no template HTML).
+    Construtor, onde se realiza os bindings de funções ( que se possibilita serem chamadas no template HTML).
     E seus estado.
   */
   constructor(props) {
     super(props);
 
-    this.newPeople = this.newPeople.bind(this);
-    this.savePeople = this.savePeople.bind(this);
+    this.editPeople = this.editPeople.bind(this);
     this.onChangeCpf = this.onChangeCpf.bind(this);
     this.onChangeNome = this.onChangeNome.bind(this);
     this.onChangeEmail = this.onChangeEmail.bind(this);
@@ -27,6 +28,7 @@ export default class AddPeople extends Component {
     this.onChangeSeuDiferencial = this.onChangeSeuDiferencial.bind(this);
 
     this.state = {
+      id: -1,
       cpf: '',
       nome: '',
       email: '',
@@ -39,8 +41,12 @@ export default class AddPeople extends Component {
     };
   }
 
+  /*
+    Método é chamado quando o componente é montado.
+  */
   async componentDidMount() {
-    document.title = 'Cadastrar pessoa';
+    document.title = 'Editar Cadastro';
+    this.searchPeople(this.props.match.params.id);
   }
 
   /*
@@ -89,10 +95,41 @@ export default class AddPeople extends Component {
   }
 
   /*
-    Método de cadastro, onde se cria e valida um objeto de dados para o POST.
+    Como não há get/id, precisamos buscar, todos. Depois iteramos até achar o id que o router do react passou por parametros
+    (Como é client side, não há métodos POST no browser) e quando acharmos, alimentamos os dados de edição.
   */
-  async savePeople() {
-    const data = {
+  async searchPeople(id) {
+    try {
+      const response = await PeopleService.getAll();
+      let currentPeople = {};
+
+      response.data.forEach((people) => {
+        if (people.id.toString() === id.toString()) {
+          currentPeople = people;
+        }
+      });
+
+      this.setState({
+        id: currentPeople.id,
+        cpf: currentPeople.cpf === undefined ? '' : cpfRegex(currentPeople.cpf),
+        nome: currentPeople.nome,
+        email: currentPeople.email,
+        genero: currentPeople.genero,
+        telefone: currentPeople.telefone === undefined ? '' : telefoneRegex(currentPeople.telefone),
+        data_nascimento: currentPeople.data_nascimento === undefined ? '' : nascimentoRegex(currentPeople.data_nascimento),
+        seu_diferencial: currentPeople.seu_diferencial,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /*
+    Criamos o objeto data que contem os dados para o PUT, e o id. Depois verificamos o validador e
+  */
+  async editPeople() {
+    const id = this.state.id;
+    const data = {   
       cpf: this.state.cpf,
       nome: this.state.nome,
       email: this.state.email,
@@ -108,7 +145,7 @@ export default class AddPeople extends Component {
       alert(`Formulário contém erros. Seguintes campos não estão validados: ${objetoValidacao.msgErro}`);
     } else {
       try {
-        await PeopleService.create(data);
+          await PeopleService.update(id, data);
         this.setState({
           saved: true,
         });
@@ -118,32 +155,19 @@ export default class AddPeople extends Component {
     }
   }
 
-  /*
-    Limpar os campos quando uma pessoa é cadastrada.
-  */
-  newPeople() {
-    this.setState({
-      cpf: '',
-      nome: '',
-      email: '',
-      genero: '',
-      telefone: '',
-      data_nascimento: '',
-      seu_diferencial: '',
-
-      saved: false,
-    });
-  }
-
   render() {
     return (
       <div className="submit-form">
         {this.state.saved ? (
           <div>
-            <h4>Você cadastrou com sucesso!</h4>
-            <button className="btn btn-success" onClick={this.newPeople}>
-              Cadastrar outra pessoa
-            </button>
+            <h4>Você Editou com sucesso!</h4>
+            <Link
+              to={`/people`}
+            >
+              <button className="btn btn-lg btn-success" onClick={this.newPeople}>
+                Voltar a pagina inicial
+              </button>
+            </Link>
           </div>
         ) : (
           <div>
@@ -172,7 +196,8 @@ export default class AddPeople extends Component {
             </div>
             <div className="form-group">
               <label htmlFor="telefone">Telefone</label>
-              <InputTelefone
+              <input
+                className="form-control"
                 type="text"
                 id="telefone"
                 required
@@ -228,8 +253,8 @@ export default class AddPeople extends Component {
               />
             </div>
 
-            <button onClick={this.savePeople} className="btn btn-lg btn-success">
-              Cadastrar
+            <button onClick={this.editPeople} className="btn btn-lg btn-success">
+              Atualizar
             </button>
           </div>
         )}
